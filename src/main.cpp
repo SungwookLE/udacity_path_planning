@@ -104,8 +104,10 @@ int main() {
            */
           
           int prev_size = previous_path_x.size();
-          std::map<int, double> info;
-          
+          std::map<std::string, double> info={};
+          int des_lane;
+          update_current_lane(car_d, lane);
+          des_lane = lane;
 
           std::vector<double> my_car = {car_x, car_y, car_s, car_d, car_yaw, car_speed};
 
@@ -131,42 +133,57 @@ int main() {
             }
           }
 
-          int mode = -1;
+          std::string mode = "no_act";
           double cost_val = 100;
 
           if (too_close == true){
+            //info.clear();
             for (int i = 0; i < sensor_fusion.size() ; ++i){
-              choose_mode(sensor_fusion[i], lane, my_car, prev_size, info);
+              choose_mode(sensor_fusion[i], lane, my_car, prev_size, info, end_path_s);
             }
-            check_empty(info, lane);
+            //check_empty(info, lane);
 
-            for (int i = 0; i < info.size(); ++i){
-              if ( cost_val > info[i]){
-                mode = i;
-                cost_val = info[i];
+            std::map<std::string, double>::iterator iter;
+            for ( iter = info.begin(); iter != info.end(); ++iter)
+            {
+              if (cost_val > iter->second){
+                mode = iter->first;
+                cost_val = iter->second;
               }
+              std::cout << iter->first << ": " << iter->second << std::endl;
             }
-            std::cout << "mode: " << mode << ", val: " << cost_val << std::endl;
-        }
-
-          if (mode == 0)
+            std::cout <<"PICK! >>" <<mode << ": " << cost_val << std::endl << std::endl;
+          }
+          
+          if (mode == "left")
           {
-            if (lane>0)
-              lane -= 1;
+            if (lane>0){
+              ref_vel -= .056*1.5;
+              des_lane = lane-1;
+            }
+            else
+              ref_vel -= .224*1.5;
           }
-          else if (mode ==1){
-            if (lane <2)
-              lane += 1;
+          else if (mode =="right"){
+            if (lane <2){
+              ref_vel -= .056*1.5;
+              des_lane = lane+1;
+            }
+            else
+              ref_vel -= .224*1.5;
           }
-          else if (mode ==2)
+          else if (mode =="keep")
           {
-            ref_vel -= .224;
+            ref_vel -= .224*1.5;
+            if (cost_val > 0.1)
+              ref_vel -= .224*1.5;
           }
-          else if (ref_vel < 49.5)
-          {
-            ref_vel += .224;
+          else{ // no_act
+            if (ref_vel <49.5) {  // 49.5 (max speed)
+              ref_vel += .224*1.5;
+            }
           }
-
+         
           vector<double> ptsx;
           vector<double> ptsy;
 
@@ -200,9 +217,9 @@ int main() {
             ptsy.push_back(ref_y);
           }
 
-          vector<double> next_mp0 = getXY(car_s + 30, (2 + 4 * lane), map_waypoints_s, map_waypoints_x, map_waypoints_y);
-          vector<double> next_mp1 = getXY(car_s + 60, (2 + 4 * lane), map_waypoints_s, map_waypoints_x, map_waypoints_y);
-          vector<double> next_mp2 = getXY(car_s + 90, (2 + 4 * lane), map_waypoints_s, map_waypoints_x, map_waypoints_y);
+          vector<double> next_mp0 = getXY(car_s + 30, (2 + 4 * des_lane), map_waypoints_s, map_waypoints_x, map_waypoints_y);
+          vector<double> next_mp1 = getXY(car_s + 60, (2 + 4 * des_lane), map_waypoints_s, map_waypoints_x, map_waypoints_y);
+          vector<double> next_mp2 = getXY(car_s + 90, (2 + 4 * des_lane), map_waypoints_s, map_waypoints_x, map_waypoints_y);
 
           ptsx.push_back(next_mp0[0]);
           ptsx.push_back(next_mp1[0]);
