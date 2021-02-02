@@ -104,6 +104,7 @@ int main() {
            */
           
           int prev_size = previous_path_x.size();
+
           std::map<std::string, double> info={};
           int des_lane;
           update_current_lane(car_d, lane);
@@ -152,31 +153,33 @@ int main() {
               }
               std::cout << iter->first << ": " << iter->second << std::endl;
             }
-            std::cout <<"PICK! >>" <<mode << ": " << cost_val << std::endl << std::endl;
+            std::cout <<"PICK >> " <<mode << "!" << std::endl << std::endl;
           }
           
           if (mode == "left")
           {
             if (lane>0){
-              ref_vel -= .056*1.5;
+              ref_vel -= .084;
               des_lane = lane-1;
             }
             else
-              ref_vel -= .224*1.5;
+              ref_vel -= .112;
           }
           else if (mode =="right"){
             if (lane <2){
-              ref_vel -= .056*1.5;
+              ref_vel -= .084;
               des_lane = lane+1;
             }
             else
-              ref_vel -= .224*1.5;
+              ref_vel -= .112;
           }
           else if (mode =="keep")
           {
-            ref_vel -= .224*1.5;
-            if (cost_val > 0.1)
+            ref_vel -= .18;
+            if (cost_val > 0.05){
+              std::cout << "CAUTION: May Crush" << std::endl;
               ref_vel -= .224*1.5;
+            }
           }
           else{ // no_act
             if (ref_vel <49.5) {  // 49.5 (max speed)

@@ -5,7 +5,7 @@
 #include <map>
 #include <iostream>
 #include <string>
-#define cal_d(lane) ((double)(2+lane*4))
+#define cal_d(lane) (2+(double)(lane)*4)
 //(1/30, START HERE)
 
 using std::vector;
@@ -22,7 +22,7 @@ void choose_mode(vector<double> sensor_fusion, const int cur_lane, vector<double
     double car_yaw = my_car[4];
     double car_speed = my_car[5];
 
-    int cur_d = 2+4*cur_lane;
+    double cur_d = cal_d(cur_lane);
     double d = sensor_fusion[6];
     double vx = sensor_fusion[3];
     double vy = sensor_fusion[4];
@@ -49,7 +49,7 @@ void choose_mode(vector<double> sensor_fusion, const int cur_lane, vector<double
                     info["keep"] = cost_val;
             }
         }
-        else if( (d> (cal_d(cur_lane-1) -2) ) && (d < (cur_d -2) ) && (d>0) ){// left
+        else if( (d > ( cal_d(cur_lane-1) -2 ) ) && ( d < (cur_d -2) ) && (d>0) ){// left
             if (check_car_s > car_s)
                 cost_val = 1/(check_car_s-car_s) ;
             else
@@ -62,7 +62,7 @@ void choose_mode(vector<double> sensor_fusion, const int cur_lane, vector<double
                     info["left"] = cost_val;
             }
         }
-        else if ( (d< (cal_d(cur_lane+1) +2) )&&(d > (cur_d +2) ) && ( d < (cal_d(2)+2) ) ){// right
+        else if ( (d < (cal_d(cur_lane+1) +2) )&&(d > (cur_d +2) ) && ( d < (cal_d(2)+2) ) ){// right
             if (check_car_s > car_s)
                 cost_val = 1/(check_car_s-car_s);
             else
